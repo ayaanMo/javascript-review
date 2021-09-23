@@ -7,15 +7,15 @@
 // apply接收的是参数数组  Function.call(obj[, param1[, param2[, [,...paramN]]]]);
 // call传递给函数的参数必须罗列出来 Function.apply(obj[, argArray]);
 function Person(name, age) {
-  this.name = name;
-  this.age = age;
-  this.add = function () {
-    return 3;
-  };
+    this.name = name;
+    this.age = age;
+    this.add = function () {
+        return 3;
+    };
 }
 function Student(name, age, grade) {
-  this.grade = grade;
-  Person.call(this, name, age);
+    this.grade = grade;
+    Person.call(this, name, age);
 }
 let stu = new Student('张三', 18, '二年级');
 console.log(stu);
@@ -37,3 +37,16 @@ console.log(str02.substr(-3, 2)); //rl
 let str03 = 'Hello World';
 console.log(str03.slice(3, 7)); //lo W
 console.log(str03.slice(-3)); //rld
+/**
+ *
+ * @param {*} obj
+ */
+function typeOf(obj) {
+    let res = Object.prototype.toString.call(obj).split(' ')[1];
+    res = res.substring(0, res.length - 1).toLowerCase();
+    return res;
+}
+console.log(typeOf([]));
+console.log(typeOf({}));
+console.log(typeOf(function a() {}));
+console.log(typeOf(new Set()));

@@ -15,4 +15,4 @@ console.log(flattening(arr));
 // flat() 方法会按照一个可指定的深度递归遍历数组，
 // 并将所有元素与遍历到的子数组中的元素合并为一个新数组返回
 // 使用 Infinity，可展开任意深度的嵌套数组
-console.log(arr.flat(3));
+console.log(arr.flat(Infinity));

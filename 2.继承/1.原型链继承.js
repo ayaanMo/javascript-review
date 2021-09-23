@@ -5,13 +5,13 @@
  * 问题2：子类在实例化的时候不能给父类构造函数传参；
  */
 function Animal() {
-  this.colors = ['black', 'white'];
+    this.colors = ['black', 'white'];
 }
 // prototype是函数独有的，prototype就是一个对象，prototype里面有两个属性：__proto__和constructor
 // 原型可以用来共享方法
 // 原型中的this指向实例
 Animal.prototype.getColor = function () {
-  return this.colors;
+    return this.colors;
 };
 function Dog() {}
 Dog.prototype = new Animal();
