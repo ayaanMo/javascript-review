@@ -37,16 +37,21 @@ console.log(str02.substr(-3, 2)); //rl
 let str03 = 'Hello World';
 console.log(str03.slice(3, 7)); //lo W
 console.log(str03.slice(-3)); //rld
-/**
- *
- * @param {*} obj
- */
+// review
 function typeOf(obj) {
-    let res = Object.prototype.toString.call(obj).split(' ')[1];
-    res = res.substring(0, res.length - 1).toLowerCase();
-    return res;
+    // 1. 先判断是不是对象
+    if (typeof obj !== 'object') return;
+    // 2.调用对象原型上的方法，进行字符串切割转成数组
+    let result = Object.prototype.toString.call(obj).split(' ')[1];
+    // 3.获取到该字符串，然后进行转换成小写
+    result = result.substring(0, result.length - 1).toLowerCase();
+    return result;
 }
+console.log('-----------');
+console.log(typeOf({ a: 1 }));
+console.log(typeOf(1));
 console.log(typeOf([]));
-console.log(typeOf({}));
-console.log(typeOf(function a() {}));
-console.log(typeOf(new Set()));
+console.log(typeOf(function () {}));
+console.log(typeOf(new Function()));
+console.log(typeOf(null));
+console.log(typeOf(undefined));
