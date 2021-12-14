@@ -1,14 +1,14 @@
 // 基本的思路是使用原型链继承原型上的属性和方法，而通过盗用构造函数继承实例属性
 function Animal(name) {
-  this.name = name;
-  this.colors = ['black', 'white'];
+    this.name = name;
+    this.colors = ['black', 'white'];
 }
 Animal.prototype.getName = function () {
-  return this.name;
+    return this.name;
 };
 function Dog(name, age) {
-  Animal.call(this, name);
-  this.age = age;
+    Animal.call(this, name);
+    this.age = age;
 }
 Dog.prototype = new Animal();
 Dog.prototype.constructor = Dog;

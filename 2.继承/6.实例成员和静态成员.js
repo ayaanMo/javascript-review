@@ -9,8 +9,8 @@
  *      2.只能通过构造函数来访问
  */
 function Person(name, age) {
-  this.age = age;
-  this.name = name;
+    this.age = age;
+    this.name = name;
 }
 Person.sex = '女';
 const p1 = new Person('James', 18);
