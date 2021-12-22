@@ -16,8 +16,11 @@ function object(o) {
     return new F();
 }
 function inheritPrototype(child, parent) {
+    // 该实例的原型对象指向的是parent
     let prototype = object(parent.prototype);
+    // 将该实例指向子类构造函数
     prototype.constructor = child;
+    // 子类函数的原型对象指向该实例
     child.prototype = prototype;
 }
 inheritPrototype(Dog, Animal);
