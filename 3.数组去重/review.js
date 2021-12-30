@@ -32,7 +32,7 @@ for (let key in forinArr) {
     console.log(key, 'for in');
 }
 // 3. for of 循环
-// 是ES6新增加的方法,就是为了解决for of循环数组产生的问题
+// 是ES6新增加的方法,就是为了解决for in循环数组产生的问题
 let forofArr = [1, 2, 3, 4, 5, 6];
 forofArr.name = '测试';
 for (let [key, val] of forofArr.entries()) {
@@ -71,6 +71,10 @@ let newfilterarr = filterArr.filter(item => {
     }
 });
 console.log(newfilterarr, 'filter');
+let filterArrRes = filterArr.filter(item => {
+    return true;
+});
+console.log(filterArrRes, 'filterArr');
 // 7.some循环
 // some循环查找数组中任意符合条件的元素并返回boolean值，当数组中有任意元素符合条件就返回true否则返回false
 // 如果有一个元素满足条件，则返回true，且剩余的元素不会在执行检测，循环直接结束
