@@ -9,3 +9,15 @@ function typeOf(obj) {
     return res;
 }
 console.log(typeOf(['a']));
+console.log('--------------------');
+console.log(typeOf({ a: 1 }));
+console.log('--------------------');
+console.log(typeOf(null));
+console.log('--------------------');
+console.log(typeOf(undefined));
+console.log('--------------------');
+console.log(typeOf(1));
+console.log('--------------------');
+console.log(typeOf('1'));
+console.log('--------------------');
+console.log(typeOf(false));

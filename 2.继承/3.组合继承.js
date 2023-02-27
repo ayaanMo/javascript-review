@@ -17,6 +17,7 @@ Dog.prototype.constructor = Dog;
 
 let dog1 = new Dog('奶昔', 2);
 dog1.colors.push('brown');
+console.log(dog1);
 let dog2 = new Dog('哈赤', 1);
 console.log(dog2.getName());
 console.log(dog2);

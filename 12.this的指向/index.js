@@ -98,7 +98,7 @@
     };
     var name = 'Wiliam';
     var Hi = person.sayHi;
-    Hi.call(person); //Hi.apply(person)、
+    Hi.call(person);
     // hello YvetteLau
 }
 {
@@ -151,17 +151,19 @@
             console.log(this);
         },
     };
-    // 输出obj
+
     let hi = obj.hi();
-    // 输出obj
     hi();
     let sayHi = obj.sayHi();
-    // 输出window
     let fun1 = sayHi();
-    // 输出window
     fun1();
-    // 输出window
     obj.say();
+
+    // 输出obj
+    // 输出obj
+    // 输出window
+    // 输出window
+    // 输出window
 }
 {
     var obj = {
@@ -184,14 +186,15 @@
         },
     };
     let sayHi = obj.sayHi();
-    // 输出window
     let fun1 = sayHi();
-    // 输出window
     fun1();
-    // 输出obj
     let fun2 = sayHi.bind(obj)();
-    // 输出wobj
     fun2();
+
+    // 输出window
+    // 输出window
+    // 输出obj
+    // 输出obj
 }
 {
     var number = 5;
@@ -435,7 +438,7 @@
 {
     const User = {
         name: 'zc',
-        age: 18,
+        age: 24,
         introduce: function () {
             console.log(this.name);
         },
@@ -710,14 +713,16 @@
         return function (n) {
             this.num += n;
             num++;
+            console.log(this.num);
             console.log(num);
         };
     })(obj.num);
-    // 60 61
+
     var fn = obj.fn;
-    // 65 62
+
     fn(5);
-    // 30 63
+
     obj.fn(10);
-    console.log(num, obj.num);
+    // 立即执行函数  限制性 此时的num 是21
+    // 后面的两次执行都会把 num+1
 }

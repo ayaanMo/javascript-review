@@ -4,6 +4,7 @@
  */
 function Animal(name) {
     this.name = name;
+    this.colors = ['black', 'white'];
     this.getName = function () {
         return this.name;
     };
@@ -12,5 +13,9 @@ function Dog(name) {
     Animal.call(this, name);
 }
 Dog.prototype = new Animal();
-let dog = new Dog('jack');
-console.log(dog);
+let dog1 = new Dog('jack');
+console.log(dog1);
+dog1.colors.push('brown');
+console.log(dog1.colors);
+let dog2 = new Dog();
+console.log(dog2.colors);
