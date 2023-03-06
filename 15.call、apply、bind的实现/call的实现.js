@@ -37,3 +37,20 @@
     foo('jack', 17);
     foo.myCall(obj, 'lucy', 13);
 }
+{
+    // new的实现
+    function _new(target) {
+        if (typeof target !== 'function') {
+            throw '请传递函数';
+        }
+        var newObj = Object.create(target.prototype);
+        var args = [].slice.call(arguments, 0);
+        var res = target.call(newObj, args);
+        res =
+            res !== null &&
+            (typeof res === 'object' || typeof res === 'function')
+                ? res
+                : newObj;
+        return res;
+    }
+}

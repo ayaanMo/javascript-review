@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--  <script type="text/javascript" src="debounce.js"></script>
+    <script type="text/javascript" src="throttle.js"></script> -->
+    <script type="text/javascript" src="复习.js"></script>
+    <title>Document</title>
+
+</head>
+
+<body>
+    <div id="box" style="width:200px;height:500px;background-color: pink;overflow-x: auto;">
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+        <p>123123123</p>
+    </div>
+    <div>
+        <input id="inputV" />
+        <input id="inputx" />
+    </div>
+</body>
+<script>
+    let scrollBox = document.getElementById('box')
+
+    let debounceAjax = debounce(myFunction, 2000);
+
+    scrollBox.addEventListener("scroll", function (e) {
+        debounceAjax("name")
+    });
+    function myFunction() {
+        console.log(new Date());
+        console.log(arguments);
+        console.log(this);
+    }
+
+    let input = document.getElementById('inputV');
+    let throttleFunc = throttle(test, 3000);
+    input.addEventListener("keyup", function (e) {
+        throttleFunc("name")
+    });
+    function test() {
+        console.log(new Date());
+        console.log(arguments);
+        console.log(this);
+    }
+
+    let input1 = document.getElementById('inputx');
+    let throttleFunc1 = throttleTimer(test1, 3000);
+    input1.addEventListener("keyup", function (e) {
+        throttleFunc1("name")
+    });
+    function test1() {
+        console.log(new Date());
+        console.log(arguments);
+        console.log(this);
+    }
+
+</script>
+
+</html>
