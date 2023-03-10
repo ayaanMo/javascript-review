@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  },
+  "scripts": {
+    "test": "promises-aplus-tests ./10.promise实现/mypromise.js",
+    "test1": "promises-aplus-tests ./10.promise实现/index.js",
+    "test2": "promises-aplus-tests ./10.promise实现/review.js"
+  }
+}

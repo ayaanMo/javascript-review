@@ -214,7 +214,7 @@
             };
         })(),
     };
-    // 闭包先执行 这个时候的number等于3 this.number 定义的是window上的number则 number为10
+    // IIFE先执行 这个时候的number等于3 this.number 定义的是window上的number则 number为10
     var myFun = obj.fn;
     // 这个时候window上面的number为 10  闭包里面的numer为9
     myFun.call(null); //10 9
