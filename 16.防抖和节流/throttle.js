@@ -21,8 +21,9 @@ function throttleTimer(func, wait) {
         args = arguments;
         if (!timeout) {
             timeout = setTimeout(function () {
-                timeout = null;
                 func.apply(context, args);
+                clearTimeout(timeout);
+                timeout = null;
             }, wait);
         }
     };
