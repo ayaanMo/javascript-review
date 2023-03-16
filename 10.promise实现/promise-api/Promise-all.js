@@ -3,7 +3,7 @@ const MyPromise = require('../index');
 /**
  * Promise.all()方法用于将多个Promise实例，包装成一个新的Promse实例
  * 1.将接受一个数组作为参数；
- * 2.数组的每个元素都是Promise的实例，如果不是Promise的实力则使用Promise.resolve方法，将参数转为Promise实例
+ * 2.数组的每个元素都是Promise的实例，如果不是Promise的实例则使用Promise.resolve方法，将参数转为Promise实例
  * 3.参数可以不是数组，但是必须具有Iterator接口，且返回的每个成员都是Promise实例
  * 4.整体的状态由各个元素执行的结果决定，都为fulfilled时，将元素的返回值组成一个数组，传递给回调函数
  * 5.一旦有一个元素返回的转改是rejected，则整体的状态将是rejected，并且将第一个被rejected的实例的返回值，传递给回调函数

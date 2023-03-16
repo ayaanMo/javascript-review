@@ -136,12 +136,29 @@ function resolvePromise(promise2, x, resolve, reject) {
         resolve(x);
     }
 }
-MyPromise.deferred = function () {
-    let result = {};
-    result.promise = new MyPromise((resolve, reject) => {
-        result.resolve = resolve;
-        result.reject = reject;
+// MyPromise.deferred = function () {
+//     let result = {};
+//     result.promise = new MyPromise((resolve, reject) => {
+//         result.resolve = resolve;
+//         result.reject = reject;
+//     });
+//     return result;
+// };
+// module.exports = MyPromise;
+let promise1 = new MyPromise((resolve, reject) => {
+    console.log(123123);
+    resolve('这次一定');
+});
+promise1
+    .then(
+        value => {
+            console.log(value);
+            return '789';
+        },
+        () => {}
+    )
+    .then(value => {
+        console.log(value);
+        return value;
     });
-    return result;
-};
-module.exports = MyPromise;
+console.log(promise1);
