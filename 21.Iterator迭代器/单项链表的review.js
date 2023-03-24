@@ -47,6 +47,7 @@ LinkData.prototype.delete = function (target) {
 let link = new LinkData();
 link.add(1);
 link.add(2);
+console.dir(link, { depth: null });
 link.add(3);
 link.insert(4, 2);
 console.dir(link, { depth: null });

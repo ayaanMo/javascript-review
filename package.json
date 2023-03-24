@@ -5,6 +5,7 @@
   "scripts": {
     "test": "promises-aplus-tests ./10.promise实现/mypromise.js",
     "test1": "promises-aplus-tests ./10.promise实现/index.js",
-    "test2": "promises-aplus-tests ./10.promise实现/review.js"
+    "test2": "promises-aplus-tests ./10.promise实现/review.js",
+    "test3": "promises-aplus-tests ./复习手写代码.js"
   }
 }

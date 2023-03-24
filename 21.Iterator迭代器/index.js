@@ -36,3 +36,86 @@
         console.log(i);
     }
 }
+{
+    const str = 'abcdefg';
+    const iterator = str[Symbol.iterator]();
+    console.log(iterator);
+    console.log(iterator.next);
+    console.log(iterator.return);
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+}
+{
+    // 自定义一个迭代器
+    function Counter(value) {
+        this.init = value;
+    }
+    Counter.prototype[Symbol.iterator] = function () {
+        let count = 1,
+            limit = this.init;
+        return {
+            next() {
+                if (limit >= count) {
+                    return { value: count++, done: false };
+                } else {
+                    return { value: undefined, done: true };
+                }
+            },
+            return() {
+                console.log('退出了');
+                return { value: undefined, done: true };
+            },
+            throw() {
+                console.log('报错了');
+                return { value: undefined, done: true };
+            },
+        };
+    };
+    let count = new Counter(4);
+    const iterator = count[Symbol.iterator]();
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    for (let i of count) {
+        console.log(i);
+        if (i > 2) {
+            throw new Error('强制退出');
+        }
+    }
+}
+{
+    // 单项链表
+    function Node(data) {
+        this.data = data;
+        this.next = null;
+    }
+    function LinkData() {
+        this.head = null;
+    }
+    LinkData.prototype.add = function (value) {
+        const node = new Node(value);
+        if (this.head === null) {
+            this.head = node;
+        } else {
+            let current = this.head;
+            while (current.next) {
+                current = current.next;
+            }
+            current.next = node;
+        }
+    };
+    let link = new LinkData();
+    link.add(1);
+    link.add(2);
+    console.dir(link);
+}

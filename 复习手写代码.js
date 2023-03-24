@@ -1,187 +1,202 @@
-{
-    // 数据类型判断
-    function typeOf(obj) {
-        let result = Object.prototype.toString.call(obj).split(' ')[1];
-        result = result.substring(0, result.length - 1).toLowerCase();
-        return result;
+MyPromise.PENDING = 'pending';
+MyPromise.FULFILLED = 'fulfilled';
+MyPromise.REJECTED = 'rejected';
+function MyPromise(fn) {
+    this.PromiseState = MyPromise.PENDING;
+    this.PromiseResult = null;
+    this.onFulfilledCallback = [];
+    this.onRejectedCallback = [];
+    try {
+        fn(resolve.bind(this), reject.bind(this));
+    } catch (error) {
+        reject.call(this, error);
     }
-    console.log(typeOf(1));
-}
-{
-    // 寄生式组合继承
-    // 核心内容
-    function create(prototype) {
-        function f() {}
-        f.prototype = prototype;
-        return new f();
-    }
-    function inheritPrototype(c, p) {
-        let prototype = create(p.prototype);
-        prototype.constructor = c;
-        c.prototype = prototype;
-    }
-}
-{
-    // 深拷贝
-    function cloneDeep(target, hash = new WeakMap()) {
-        if (obj === null) return target;
-        if (typeof obj !== 'object') return target;
-        if (obj instanceof Date) return new Date(target);
-        if (obj instanceof RegExp) return new RegExp(target);
-        if (obj instanceof HTMLElement) return target;
-        if (hash.get(target)) return hash.get(target);
-        let source = new target.constructor();
-        hash.set(target, source);
-        Reflect.ownKeys(target).forEach(key => {
-            source[key] = cloneDeep(target[key], hash);
-        });
-        return source;
-    }
-}
-{
-    // new的实现
-    function _new(ctor) {
-        if (typeof ctor !== 'function') {
-            throw new Error('This is not a function.');
+
+    function resolve(value) {
+        if (this.PromiseState === MyPromise.PENDING) {
+            this.PromiseState = MyPromise.FULFILLED;
+            this.PromiseResult = value;
+            this.onFulfilledCallback.forEach(callback => {
+                callback();
+            });
         }
-        let args = [].slice.call(arguments, 1);
-        let newObj = Object.create(ctor.prototype);
-        let result = ctor.apply(newObj, args);
-        return (result =
-            result !== null &&
-            (typeof result === 'object' || typeof result === 'function')
-                ? result
-                : newObj);
+    }
+    function reject(reason) {
+        if (this.PromiseState === MyPromise.PENDING) {
+            this.PromiseState = MyPromise.REJECTED;
+            this.PromiseResult = reason;
+            this.onRejectedCallback.forEach(callback => {
+                callback();
+            });
+        }
     }
 }
-{
-    // call的实现
-    Function.prototype.myCall = function (context) {
-        var context = context || window;
-        var fn = Symbol();
-        context[fn] = this;
-        let arr = [];
-        for (let i = 1; i < args.length; i++) {
-            arr.push('arr[' + i + ']');
+MyPromise.prototype.then = function (onFulfilled, onRejected) {
+    const promise2 = new MyPromise((resolve, reject) => {
+        onFulfilled =
+            typeof onFulfilled === 'function' ? onFulfilled : value => value;
+        onRejected =
+            typeof onRejected === 'function'
+                ? onRejected
+                : reason => {
+                      throw reason;
+                  };
+        if (this.PromiseState === MyPromise.FULFILLED) {
+            // 2.2.4 onFulfilled 或 onRejected 只在执行环境堆栈只包含平台代码之后调用 [3.1]
+            setTimeout(() => {
+                try {
+                    let x = onFulfilled(this.PromiseResult);
+                    resolvePromise(promise2, x, resolve, reject);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        } else if (this.PromiseState === MyPromise.REJECTED) {
+            // 2.2.4 onFulfilled 或 onRejected 只在执行环境堆栈只包含平台代码之后调用 [3.1]
+            setTimeout(() => {
+                try {
+                    let x = onRejected(this.PromiseResult);
+                    resolvePromise(promise2, x, resolve, reject);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        } else if (this.PromiseState === MyPromise.PENDING) {
+            // 这个地方是为了避免then函数比resolve和reject先执行了，把各自的回调存起来
+            this.onFulfilledCallback.push(() => {
+                setTimeout(() => {
+                    try {
+                        let x = onFulfilled(this.PromiseResult);
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
+            this.onRejectedCallback.push(() => {
+                setTimeout(() => {
+                    try {
+                        let x = onRejected(this.PromiseResult);
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
         }
-        let result = eval('context[fn](' + arr + ')');
-        delete context[fn];
-        return result;
-    };
-    // apply的实现
-    Function.prototype.myApply = function (context, arr) {
-        var context = context || window;
-        var fn = Symbol();
-        context[fn] = this;
-        let result = null;
-        if (!arr) {
-            result = context[fn]();
-        } else {
-            let arr = [];
-            for (let i = 1; i < args.length; i++) {
-                arr.push('arr[' + i + ']');
-            }
-            result = eval('context[fn](' + arr + ')');
-        }
-        delete context[fn];
-        return result;
-    };
-    // bind的实现
-    Function.prototype.myBind = function (context) {
-        let args = [].slice.call(arguments, 1);
-        let fn = this;
-        function bindFunc() {
-            let arg = [].slice.call(arguments, 0);
-            return fn.apply(
-                this instanceof InheritPrototype ? this : context,
-                args.concat(arg)
-            );
-        }
-        function InheritPrototype() {}
-        InheritPrototype.prototype = fn.prototype;
-        bindFunc.prototype = new InheritPrototype();
-        bindFunc.constructor = bindFunc;
-        return bindFunc;
-    };
-}
-{
-    // 防抖
-    function debounce(fn, wait) {
-        let timer;
-        return function () {
-            let args = [].slice.call(arguments, 0);
-            let context = this;
-            if (timer) {
-                clearTimeout(timer);
-            }
-            timer = setTimeout(() => {
-                fn.apply(context, args);
-            }, wait);
-        };
+    });
+    return promise2;
+};
+function resolvePromise(promise2, x, resolve, reject) {
+    // 2.3.1 如果Promise和x引用同一对象，则以TypeError为原因拒绝Promise
+    if (promise2 === x) {
+        throw new TypeError('Chaining cycle detected for promise');
     }
-    // 节流
-    function throttleDate(fn, wait) {
-        let preDate = 0;
-        return function () {
-            let nowDate = +new Date();
-            let args = [].slice.call(arguments, 0);
-            let context = this;
-            if (nowDate > preDate + wait) {
-                fn.apply(context, args);
-                preDate = nowDate;
-            }
-        };
-    }
-    function throttleTimer(fn, wait) {
-        let timer = null;
-        return function () {
-            let args = [].slice.call(arguments, 0);
-            let context = this;
-            if (timer) return;
-            timer = setTimeout(() => {
-                fn.apply(context, args);
-                clearTimeout(timer);
-                timer = null;
-            }, wait);
-        };
-    }
-}
-{
-    // 柯里化 是思想 将函数分拆成一元函数
-    function add(a, b, c) {
-        return a + b + c;
-    }
-    function curry(fn) {
-        return function next(...args) {
-            if (fn.length === args.length) {
-                return fn(...args);
+    // 2.3.2 如果 x 是一个 promise 实例，则采用它的状态
+    if (x instanceof MyPromise) {
+        // 这个接受x的状态  不是很理解 也就是继续执行x，如果执行的时候拿到一个y，还要继续解析y
+        /**
+         *2.3.2.1 如果 x 是 pending 状态，那么保留它（递归执行这个 promise 处理程序），直到 pending 状态转为 fulfilled 或 rejected 状态
+         *2.3.2.2 如果或当 x 状态是 fulfilled，resolve 它，并且传入和 promise1 一样的值 value
+         *2.3.2.3 如果或当 x 状态是 rejected，reject 它，并且传入和 promise1 一样的值 reason
+         */
+        x.then(y => {
+            resolvePromise(promise2, y, resolve, reject);
+        }, reject);
+    } else if (
+        // 2.3.3 此外，如果 x 是个对象或函数类型
+        x !== null &&
+        (typeof x === 'object' || typeof x === 'function')
+    ) {
+        try {
+            // 2.3.3.1 把 x.then 赋值给 then 变量
+            var then = x.then;
+            let flag = false;
+            if (typeof then === 'function') {
+                try {
+                    // 2.3.3.3 如果 then 是函数类型，那个用 x 调用它（将 then 的 this 指向 x）,第一个参数传 resolvePromise ，第二个参数传 rejectPromise
+                    then.call(
+                        x,
+                        // 2.3.3.3.1 如果或当 resolvePromise 被调用并接受一个参数 y 时，执行 [[Resolve]](promise, y)
+                        y => {
+                            // 2.3.3.3.3 如果 resolvePromise 和 rejectPromise 已经被调用或以相同的参数多次调用的话吗，优先第一次的调用，并且之后的调用全部被忽略（避免多次调用）
+                            if (!flag) {
+                                flag = true;
+                                resolvePromise(promise2, y, resolve, reject);
+                            }
+                        },
+                        // 2.3.3.3.2 如果或当 rejectPromise 被调用并接受一个参数 r 时，执行 reject(r)
+                        r => {
+                            // 2.3.3.3.3 如果 resolvePromise 和 rejectPromise 已经被调用或以相同的参数多次调用的话吗，优先第一次的调用，并且之后的调用全部被忽略（避免多次调用）
+                            if (!flag) {
+                                flag = true;
+                                reject(r);
+                            }
+                        }
+                    );
+                    // 2.3.3.4 如果 then 执行过程中抛出了异常，
+                } catch (error) {
+                    // 2.3.3.3.4.1 如果 resolvePromise 或 rejectPromise 已经被调用，那么忽略异常
+                    if (!flag) {
+                        flag = true;
+                        // 2.3.3.3.4.2 否则，则 reject 这个异常
+                        reject(error);
+                    }
+                }
             } else {
-                return function (...arg) {
-                    return next(...args, ...arg);
-                };
+                resolve(x);
             }
-        };
+        } catch (error) {
+            reject(error);
+        }
+    } else {
+        // 2.3.4 如果 x 即不是函数类型也不是对象类型，直接 resolve x（resolve(x)）
+        resolve(x);
     }
-    let sum = curry(add);
-    console.log(sum(1, 2, 3));
-    console.log(sum(1)(2)(3));
-    console.log(sum(1)(2, 3));
 }
-{
-    // 偏函数 存在一个预设的概念，预设一个值，后面函数可以传递其他的值
-    function partial(fn) {
-        let args = [].slice.call(arguments, 1);
-        return function () {
-            let arg = [...arguments];
-            console.log(args.concat(arg));
-            return fn.apply(this, args.concat(arg));
-        };
-    }
-    function mul(a, b, c) {
-        return a * b * c;
-    }
-    let f = partial(mul, 1);
-    console.log(f(2, 3));
-    console.log(f(4, 5));
-    console.log(f(3, 7));
-}
+let promise1 = new MyPromise((resolve, reject) => {
+    resolve('resolve111');
+});
+promise1
+    .then(
+        value => {
+            return new MyPromise((resolve, reject) => {
+                resolve(value);
+            });
+        },
+        () => {}
+    )
+    .then(
+        value => {
+            console.log(value);
+        },
+        () => {}
+    );
+console.log('--------------');
+let promise2 = new Promise((resolve, reject) => {
+    resolve('resolve');
+});
+promise2
+    .then(
+        value => {
+            return new Promise((resolve, reject) => {
+                resolve(value);
+            });
+        },
+        () => {}
+    )
+    .then(
+        value => {
+            console.log(value);
+        },
+        () => {}
+    );
+MyPromise.deferred = function () {
+    let result = {};
+    result.promise = new MyPromise((resolve, reject) => {
+        result.resolve = resolve;
+        result.reject = reject;
+    });
+    return result;
+};
+module.exports = MyPromise;
