@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "browserify": "^17.0.0",
     "promises-aplus-tests": "^2.1.2"
   },
   "scripts": {
@@ -7,5 +8,8 @@
     "test1": "promises-aplus-tests ./10.promise实现/index.js",
     "test2": "promises-aplus-tests ./10.promise实现/review.js",
     "test3": "promises-aplus-tests ./复习手写代码.js"
+  },
+  "dependencies": {
+    "uniq": "^1.0.1"
   }
 }

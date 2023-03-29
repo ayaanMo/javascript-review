@@ -1,202 +1,312 @@
-MyPromise.PENDING = 'pending';
-MyPromise.FULFILLED = 'fulfilled';
-MyPromise.REJECTED = 'rejected';
-function MyPromise(fn) {
-    this.PromiseState = MyPromise.PENDING;
-    this.PromiseResult = null;
-    this.onFulfilledCallback = [];
-    this.onRejectedCallback = [];
-    try {
-        fn(resolve.bind(this), reject.bind(this));
-    } catch (error) {
-        reject.call(this, error);
-    }
+console.log('1');
 
-    function resolve(value) {
-        if (this.PromiseState === MyPromise.PENDING) {
-            this.PromiseState = MyPromise.FULFILLED;
-            this.PromiseResult = value;
-            this.onFulfilledCallback.forEach(callback => {
-                callback();
-            });
+setTimeout(function () {
+    console.log('2');
+    process.nextTick(function () {
+        console.log('3');
+    });
+    new Promise(function (resolve) {
+        console.log('4');
+        resolve();
+    }).then(function () {
+        console.log('5');
+    });
+});
+process.nextTick(function () {
+    console.log('6');
+});
+new Promise(function (resolve) {
+    console.log('7');
+    resolve();
+}).then(function () {
+    console.log('8');
+});
+
+setTimeout(function () {
+    console.log('9');
+    process.nextTick(function () {
+        console.log('10');
+    });
+    new Promise(function (resolve) {
+        console.log('11');
+        resolve();
+    }).then(function () {
+        console.log('12');
+    });
+});
+// 1 7 6 8 2 4 3 5 9 11 10 12
+let a = 3;
+function aa(val) {
+    console.log(val);
+    val = 4;
+    console.log(val);
+    console.log(a);
+}
+aa(a);
+let b = { a: 3 };
+function bb(val) {
+    console.log(val);
+    val.a = 5;
+    console.log(val);
+    console.log(b);
+}
+bb(b);
+{
+    // 寄生式组合继承实现
+    function Animals(sex) {
+        this.colors = [];
+        this.sex = sex;
+    }
+    Animals.prototype.getColors = function () {
+        return this.colors;
+    };
+    function Dog(name, sex) {
+        console.log(new.target.name);
+        this.name = name;
+        Animals.call(this, sex);
+    }
+    function createObj(prototype) {
+        function f() {}
+        f.prototype = prototype;
+        return new f();
+    }
+    function inheritancePrototype(Parent, Child) {
+        let newObj = createObj(Parent.prototype);
+        newObj.constructor = Child;
+        Child.prototype = newObj;
+    }
+    inheritancePrototype(Animals, Dog);
+    let dog1 = new Dog('james', 18);
+    dog1.colors.push('white');
+    let dog2 = new Dog('lucy', 16);
+    dog2.colors.push('pink');
+    console.log(dog1.getColors());
+    console.log(dog2.getColors());
+    console.log(dog1);
+    console.log(dog2);
+}
+{
+    class Animals {
+        constructor(age) {
+            this.colors = ['red'];
+            this.age = age;
+            console.log(new.target.name);
+        }
+        static baseStaticField = 90;
+        getColors() {
+            return this.colors;
         }
     }
-    function reject(reason) {
-        if (this.PromiseState === MyPromise.PENDING) {
-            this.PromiseState = MyPromise.REJECTED;
-            this.PromiseResult = reason;
-            this.onRejectedCallback.forEach(callback => {
-                callback();
-            });
+    class Dog extends Animals {
+        constructor(name, age) {
+            super(age);
+            console.log(super.colors);
+            console.log(super.baseStaticField);
+            console.log(super.getColors());
+            this.name = name;
         }
+    }
+    let dog1 = new Dog('james', 18);
+    dog1.colors.push('white');
+    let dog2 = new Dog('lucy', 16);
+    dog2.colors.push('pink');
+    console.log(dog1.getColors());
+    console.log(dog2.getColors());
+    console.log(dog1);
+    console.log(dog2);
+}
+{
+    class Base {
+        static baseStaticField = 90;
+        baseMethod() {
+            return 10;
+        }
+    }
+    class Extended extends Base {
+        constructor() {
+            console.log(super.baseStaticField);
+        }
+        extendedField = super.baseMethod(); // 10
+        static extendedStaticField = super.baseStaticField; // 90
+    }
+    let d = new Extended();
+    console.log(d);
+}
+{
+    function _new(func) {
+        if (Object.prototype.toString.call(func) !== '[object Function]') {
+            throw new TypeError('This is not a function');
+        }
+        const newObj = Object.create(func.prototype);
+        const args = [].slice.call(arguments, 1);
+        const result = func.apply(newObj, args);
+        result =
+            result !== null &&
+            (typeof result === 'object' || typeof result === 'function')
+                ? result
+                : newObj;
+        return result;
     }
 }
-MyPromise.prototype.then = function (onFulfilled, onRejected) {
-    const promise2 = new MyPromise((resolve, reject) => {
-        onFulfilled =
-            typeof onFulfilled === 'function' ? onFulfilled : value => value;
-        onRejected =
-            typeof onRejected === 'function'
-                ? onRejected
-                : reason => {
-                      throw reason;
-                  };
-        if (this.PromiseState === MyPromise.FULFILLED) {
-            // 2.2.4 onFulfilled 或 onRejected 只在执行环境堆栈只包含平台代码之后调用 [3.1]
-            setTimeout(() => {
-                try {
-                    let x = onFulfilled(this.PromiseResult);
-                    resolvePromise(promise2, x, resolve, reject);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        } else if (this.PromiseState === MyPromise.REJECTED) {
-            // 2.2.4 onFulfilled 或 onRejected 只在执行环境堆栈只包含平台代码之后调用 [3.1]
-            setTimeout(() => {
-                try {
-                    let x = onRejected(this.PromiseResult);
-                    resolvePromise(promise2, x, resolve, reject);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        } else if (this.PromiseState === MyPromise.PENDING) {
-            // 这个地方是为了避免then函数比resolve和reject先执行了，把各自的回调存起来
-            this.onFulfilledCallback.push(() => {
-                setTimeout(() => {
-                    try {
-                        let x = onFulfilled(this.PromiseResult);
-                        resolvePromise(promise2, x, resolve, reject);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-            });
-            this.onRejectedCallback.push(() => {
-                setTimeout(() => {
-                    try {
-                        let x = onRejected(this.PromiseResult);
-                        resolvePromise(promise2, x, resolve, reject);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-            });
+{
+    // call的实现
+    Function.prototype.myCall = function (context) {
+        context = context || window;
+        let fn = Symbol();
+        context[fn] = this;
+        let args = [];
+        for (let i = 1; i < arguments.length; i++) {
+            args.push(arguments[i]);
         }
-    });
-    return promise2;
-};
-function resolvePromise(promise2, x, resolve, reject) {
-    // 2.3.1 如果Promise和x引用同一对象，则以TypeError为原因拒绝Promise
-    if (promise2 === x) {
-        throw new TypeError('Chaining cycle detected for promise');
+        console.log(...args);
+        let result = context[fn](...args);
+        delete context[fn];
+        return result;
+    };
+    function ab(b, c) {
+        console.log(this.a);
+        console.log(b);
+        console.log(c);
     }
-    // 2.3.2 如果 x 是一个 promise 实例，则采用它的状态
-    if (x instanceof MyPromise) {
-        // 这个接受x的状态  不是很理解 也就是继续执行x，如果执行的时候拿到一个y，还要继续解析y
-        /**
-         *2.3.2.1 如果 x 是 pending 状态，那么保留它（递归执行这个 promise 处理程序），直到 pending 状态转为 fulfilled 或 rejected 状态
-         *2.3.2.2 如果或当 x 状态是 fulfilled，resolve 它，并且传入和 promise1 一样的值 value
-         *2.3.2.3 如果或当 x 状态是 rejected，reject 它，并且传入和 promise1 一样的值 reason
-         */
-        x.then(y => {
-            resolvePromise(promise2, y, resolve, reject);
-        }, reject);
-    } else if (
-        // 2.3.3 此外，如果 x 是个对象或函数类型
-        x !== null &&
-        (typeof x === 'object' || typeof x === 'function')
-    ) {
-        try {
-            // 2.3.3.1 把 x.then 赋值给 then 变量
-            var then = x.then;
-            let flag = false;
-            if (typeof then === 'function') {
-                try {
-                    // 2.3.3.3 如果 then 是函数类型，那个用 x 调用它（将 then 的 this 指向 x）,第一个参数传 resolvePromise ，第二个参数传 rejectPromise
-                    then.call(
-                        x,
-                        // 2.3.3.3.1 如果或当 resolvePromise 被调用并接受一个参数 y 时，执行 [[Resolve]](promise, y)
-                        y => {
-                            // 2.3.3.3.3 如果 resolvePromise 和 rejectPromise 已经被调用或以相同的参数多次调用的话吗，优先第一次的调用，并且之后的调用全部被忽略（避免多次调用）
-                            if (!flag) {
-                                flag = true;
-                                resolvePromise(promise2, y, resolve, reject);
-                            }
-                        },
-                        // 2.3.3.3.2 如果或当 rejectPromise 被调用并接受一个参数 r 时，执行 reject(r)
-                        r => {
-                            // 2.3.3.3.3 如果 resolvePromise 和 rejectPromise 已经被调用或以相同的参数多次调用的话吗，优先第一次的调用，并且之后的调用全部被忽略（避免多次调用）
-                            if (!flag) {
-                                flag = true;
-                                reject(r);
-                            }
-                        }
-                    );
-                    // 2.3.3.4 如果 then 执行过程中抛出了异常，
-                } catch (error) {
-                    // 2.3.3.3.4.1 如果 resolvePromise 或 rejectPromise 已经被调用，那么忽略异常
-                    if (!flag) {
-                        flag = true;
-                        // 2.3.3.3.4.2 否则，则 reject 这个异常
-                        reject(error);
-                    }
-                }
+    let obj = { a: 3 };
+    ab.myCall(obj, 5, 6);
+}
+{
+    // apply的实现
+    Function.prototype.myApply = function (context, args) {
+        context = context || window;
+        if (typeof context !== 'object') {
+            throw new TypeError('This is not a object');
+        }
+        if (!(args instanceof Array)) {
+            throw new TypeError('This param is not a array');
+        }
+        let fn = Symbol();
+        context[fn] = this;
+        let result = null;
+        if (args.length === 0) {
+            result = context[fn]();
+        } else {
+            result = context[fn](...args);
+        }
+        delete context[fn];
+        return result;
+    };
+    function ab(b, c) {
+        console.log(this.a);
+        console.log(b);
+        console.log(c);
+    }
+    let obj = { a: 3 };
+    ab.myApply(obj, [5, 6]);
+}
+{
+    // bind的实现
+    Function.prototype.myBind = function (context) {
+        context = context || window;
+        let args = [].slice.call(arguments, 1);
+        let self = this;
+        function func() {
+            let params = [].slice.call(arguments, 0);
+            return self.apply(
+                this instanceof fNOP ? this : context,
+                args.concat(params)
+            );
+        }
+        function fNOP() {}
+        fNOP.prototype = self.prototype;
+        func.prototype = new fNOP();
+        return func;
+    };
+    function ab(b, c) {
+        console.log(this.a);
+        console.log(b);
+        console.log(c);
+    }
+    let obj = { a: 3 };
+    ab.myBind(obj, 5, 6)();
+}
+{
+    // 偏函数
+    function add(a, b, c, d) {
+        return a + b + c + d;
+    }
+    function partial(fn) {
+        let args = [].slice.call(arguments, 1);
+        return function () {
+            let params = [].slice.call(arguments);
+            return fn.apply(null, args.concat(params));
+        };
+    }
+    let plus = partial(add, 5, 5);
+    console.log(plus(6, 7));
+    console.log(plus(9, 9));
+}
+{
+    // 柯里化
+    function mul(a, b, c) {
+        return a * b * c;
+    }
+    function corey(fn) {
+        return function next(...args) {
+            if (fn.length === args.length) {
+                return fn(...args);
             } else {
-                resolve(x);
+                return function (...params) {
+                    return next(...args, ...params);
+                };
             }
-        } catch (error) {
-            reject(error);
-        }
-    } else {
-        // 2.3.4 如果 x 即不是函数类型也不是对象类型，直接 resolve x（resolve(x)）
-        resolve(x);
+        };
     }
+    let mu = corey(mul);
+    console.log(mu(2)(2)(3));
 }
-let promise1 = new MyPromise((resolve, reject) => {
-    resolve('resolve111');
-});
-promise1
-    .then(
-        value => {
-            return new MyPromise((resolve, reject) => {
-                resolve(value);
-            });
-        },
-        () => {}
-    )
-    .then(
-        value => {
-            console.log(value);
-        },
-        () => {}
-    );
-console.log('--------------');
-let promise2 = new Promise((resolve, reject) => {
-    resolve('resolve');
-});
-promise2
-    .then(
-        value => {
-            return new Promise((resolve, reject) => {
-                resolve(value);
-            });
-        },
-        () => {}
-    )
-    .then(
-        value => {
-            console.log(value);
-        },
-        () => {}
-    );
-MyPromise.deferred = function () {
-    let result = {};
-    result.promise = new MyPromise((resolve, reject) => {
-        result.resolve = resolve;
-        result.reject = reject;
-    });
-    return result;
-};
-module.exports = MyPromise;
+{
+    // 浅拷贝
+    function clone(obj) {
+        if (obj === null && typeof obj !== 'object') {
+            throw new TypeError('This is not an object');
+        }
+        let newobj = obj instanceof Array ? [] : {};
+        for (const key in obj) {
+            if (Object.hasOwnProperty.call(obj, key)) {
+                newobj[key] = obj[key];
+            }
+        }
+        return newobj;
+    }
+    let obj = { a: 3, b: { c: 4 } };
+    let newObj = clone(obj);
+    console.log(newObj);
+    newObj.b.c = 5;
+    console.log(obj);
+    console.log(newObj);
+    console.log(obj.b === newObj.b);
+}
+{
+    // 深拷贝
+    function cloneDeep(target, hash = new WeakMap()) {
+        if (target === null) return target;
+        if (typeof target !== 'object') return target;
+        if (target instanceof Date) return new Date(target);
+        if (target instanceof RegExp) return new RegExp(target);
+        if (target instanceof HTMLElement) return target;
+        if (hash.get(target)) return hash.get(target);
+        const source = new target.constructor();
+        hash.set(target, source);
+        Reflect.ownKeys(target).forEach(key => {
+            source[key] = cloneDeep(target[key], hash);
+        });
+        return source;
+    }
+    let obj = { a: 3, b: { c: 4 } };
+    let newObj = cloneDeep(obj);
+    console.log(newObj);
+    newObj.b.c = 5;
+    console.log(obj);
+    console.log(newObj);
+    console.log(obj.b === newObj.b);
+}
+{
+    // 防抖
+}
