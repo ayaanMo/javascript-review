@@ -154,49 +154,269 @@ function resolvePromise(promise2, x, resolve, reject) {
         resolve(x);
     }
 }
-let promise1 = new MyPromise((resolve, reject) => {
-    resolve('resolve111');
-});
-promise1
-    .then(
-        value => {
-            return new MyPromise((resolve, reject) => {
-                resolve(value);
-            });
-        },
-        () => {}
-    )
-    .then(
-        value => {
-            console.log(value);
-        },
-        () => {}
-    );
-console.log('--------------');
-let promise2 = new Promise((resolve, reject) => {
-    resolve('resolve');
-});
-promise2
-    .then(
-        value => {
-            return new Promise((resolve, reject) => {
-                resolve(value);
-            });
-        },
-        () => {}
-    )
-    .then(
-        value => {
-            console.log(value);
-        },
-        () => {}
-    );
-MyPromise.deferred = function () {
-    let result = {};
-    result.promise = new MyPromise((resolve, reject) => {
-        result.resolve = resolve;
-        result.reject = reject;
+/**
+ * 1.如果参数是一个promise的实例，则Promise.resolve不做任何修改直接返回这个实例
+ * 2.如果参数是一个对象，并且带有then方法，则立即执行then内部方法，然后再返回一个promise
+ * 3.如果参数不存在，则直接返回一个新的promise 然后是fulfilled状态
+ * 4.其他类型的参数，都是直接返回该值
+ * @param {*} target
+ */
+
+MyPromise.resolve = function (target) {
+    if (target === null && target === undefined) {
+        return new MyPromise((resolve, reject) => {
+            resolve();
+        });
+    }
+    if (
+        typeof target === 'object' &&
+        target.then &&
+        typeof target.then === 'function'
+    ) {
+        return new MyPromise((resolve, reject) => {
+            target.then(resolve, reject);
+        });
+    }
+    if (target instanceof MyPromise) {
+        return target;
+    }
+    return new MyPromise((resolve, reject) => {
+        resolve(target);
     });
-    return result;
 };
+
+MyPromise.reject = function (target) {
+    return new MyPromise((reslove, reject) => {
+        reject(target);
+    });
+};
+const MyPromise = require('./10.promise实现/review');
+
+/**
+ * Promise.all的实现
+ * 1.传入的参数原型链上必须要实现了迭代器的接口；
+ * 2.回传是一个promise
+ */
+MyPromise.all = function (params) {
+    try {
+        if (
+            params[Symbol.iterator] &&
+            typeof params[Symbol.iterator] === 'function'
+        ) {
+            const result = [];
+            return new MyPromise((resolve, reject) => {
+                params.forEach(item => {
+                    MyPromise.resolve(item).then(
+                        value => {
+                            result.push(value);
+                            result.length === params.length && resolve(result);
+                        },
+                        reason => {
+                            reject(reason);
+                        }
+                    );
+                });
+            });
+        }
+    } catch (error) {
+        return new MyPromise((resolve, reject) => {
+            reject(error);
+        });
+    }
+};
+// var p1 = new MyPromise((resolve, reject) => {
+//     resolve(1);
+// });
+// var p2 = new MyPromise((resolve, reject) => {
+//     reject(2);
+// });
+// MyPromise.all([p1, p2]).then(
+//     value => {
+//         console.log(value, 'value');
+//     },
+//     reason => {
+//         console.log(reason, 'reason');
+//     }
+// );
+MyPromise.allSettled = function (params) {
+    try {
+        if (
+            params[Symbol.iterator] &&
+            typeof params[Symbol.iterator] === 'function'
+        ) {
+            const result = [];
+            return new MyPromise((resolve, reject) => {
+                params.forEach(item => {
+                    MyPromise.resolve(item).then(
+                        value => {
+                            result.push({
+                                status: 'fulfilled',
+                                value: value,
+                            });
+                            result.length === params.length && resolve(result);
+                        },
+                        reason => {
+                            result.push({
+                                status: 'rejected',
+                                value: reason,
+                            });
+                            result.length === params.length && resolve(result);
+                        }
+                    );
+                });
+            });
+        }
+    } catch (error) {
+        return new MyPromise((resolve, reject) => {
+            reject(error);
+        });
+    }
+};
+// var p1 = new MyPromise((resolve, reject) => {
+//     resolve(1);
+// });
+// var p2 = new MyPromise((resolve, reject) => {
+//     reject(2);
+// });
+// MyPromise.allSettled([p1, p2]).then(
+//     value => {
+//         console.log(value, '31313');
+//     },
+//     reason => {
+//         console.log(reason);
+//     }
+// );
+MyPromise.race = function (params) {
+    try {
+        if (
+            params[Symbol.iterator] &&
+            typeof params[Symbol.iterator] === 'function'
+        ) {
+            return new MyPromise((resolve, reject) => {
+                params.forEach(item => {
+                    MyPromise.resolve(item).then(
+                        value => {
+                            resolve(value);
+                        },
+                        reason => {
+                            reject(reason);
+                        }
+                    );
+                });
+            });
+        }
+    } catch (error) {
+        return new MyPromise((resolve, reject) => {
+            reject(error);
+        });
+    }
+};
+// var p1 = new MyPromise((resolve, reject) => {
+//     resolve(1);
+// });
+// var p2 = new MyPromise((resolve, reject) => {
+//     reject(2);
+// });
+// MyPromise.race([p1, p2]).then(
+//     value => {
+//         console.log(value);
+//     },
+//     reason => {
+//         console.log(reason);
+//     }
+// );
+MyPromise.any = function (params) {
+    try {
+        if (
+            params[Symbol.iterator] &&
+            typeof params[Symbol.iterator] === 'function'
+        ) {
+            let count = 0;
+            return new MyPromise((resolve, reject) => {
+                params.forEach(item => {
+                    MyPromise.resolve(item).then(
+                        value => {
+                            resolve(value);
+                        },
+                        reason => {
+                            count += 1;
+                            if (count === params.length) {
+                                console.log(44444);
+                                reject(
+                                    new AggregateError(
+                                        [],
+                                        'AggregateError: All promises were rejected'
+                                    )
+                                );
+                            }
+                        }
+                    );
+                });
+            });
+        }
+    } catch (error) {
+        return new MyPromise((resolve, reject) => {
+            reject(error);
+        });
+    }
+};
+//  var p1 = new MyPromise((resolve, reject) => {
+//      reject(3);
+//  });
+//  var p2 = new MyPromise((resolve, reject) => {
+//      reject(2);
+//  });
+//  MyPromise.any([p2, p1]).then(
+//      value => {
+//          console.log(value);
+//      },
+//      reason => {
+//          console.log(reason);
+//      }
+//  );
+// let promise1 = new MyPromise((resolve, reject) => {
+//     resolve('resolve111');
+// });
+// promise1
+//     .then(
+//         value => {
+//             return new MyPromise((resolve, reject) => {
+//                 resolve(value);
+//             });
+//         },
+//         () => {}
+//     )
+//     .then(
+//         value => {
+//             console.log(value);
+//         },
+//         () => {}
+//     );
+// console.log('--------------');
+// let promise2 = new Promise((resolve, reject) => {
+//     resolve('resolve');
+// });
+// promise2
+//     .then(
+//         value => {
+//             return new Promise((resolve, reject) => {
+//                 resolve(value);
+//             });
+//         },
+//         () => {}
+//     )
+//     .then(
+//         value => {
+//             console.log(value);
+//         },
+//         () => {}
+//     );
+// MyPromise.deferred = function () {
+//     let result = {};
+//     result.promise = new MyPromise((resolve, reject) => {
+//         result.resolve = resolve;
+//         result.reject = reject;
+//     });
+//     return result;
+// };
 module.exports = MyPromise;

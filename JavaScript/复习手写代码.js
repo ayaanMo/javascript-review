@@ -308,5 +308,349 @@ bb(b);
     console.log(obj.b === newObj.b);
 }
 {
-    // 防抖
+    /**
+     * @desc 函数防抖
+     * @param func 函数
+     * @param wait 延迟执行毫秒数
+     * @param immediate true 表立即执行，false 表非立即执行(立即执行版的意思是触发事件后函数会立即执行，然后 n 秒内不触发事件才能继续执行函数的效果)
+     * @returns
+     */
+    function debounce(fn, wait, immediate) {
+        let timer = null;
+        return function () {
+            let args = [].slice.call(arguments);
+            if (timer) clearTimeout(timer);
+            const self = this;
+            if (immediate) {
+                // 状态判断 当timer还存在的时候 说明还在n秒内 n秒一到  就可以立即执行了
+                let callnow = !timer;
+                timer = setTimeout(() => {
+                    timer = null;
+                }, wait);
+                if (callnow) fn.apply(self, args);
+            } else {
+                timer = setTimeout(() => {
+                    fn.apply(self, args);
+                }, wait);
+            }
+        };
+    }
+}
+{
+    /**
+     *顾名思义就是每过n秒仅执行一次回调函数。如单位时间内多次触发函数，也只有一次生效。
+     */
+    function throttleDate(fn, wait) {
+        let previous = 0;
+        return function () {
+            let args = [].slice.call(arguments);
+            const self = this;
+            let now = +new Date();
+            if (previous + wait < now) {
+                fn.apply(self, args);
+                previous = now;
+            }
+        };
+    }
+    function throttleTimer(fn, wait) {
+        let timer = null;
+        return function () {
+            let args = [].slice.call(arguments);
+            const self = this;
+            if (timer) return;
+            timer = setTimeout(() => {
+                fn.apply(self, args);
+                clearTimeout(timer);
+                timer = null;
+            }, wait);
+        };
+    }
+}
+
+{
+    //set get delete clear has
+    const map = new Map([
+        [1, 2],
+        [3, 4],
+    ]);
+    console.log(map.has(1));
+    console.log(map.get(1));
+    console.log(map.delete(3));
+    console.log(map);
+    console.log(map.clear());
+    console.log(map);
+    console.log(map.set(5, 6).get(5));
+    console.log(map);
+    let obj = {};
+    map.set(obj, 8);
+    map.set(obj, 9);
+    console.log(map);
+    console.log(...map);
+}
+{
+    // set get  has delete
+    let obj = {};
+    let obj2 = {};
+    const weak = new WeakMap();
+    weak.set(obj, 4);
+    console.log(weak.get(obj));
+    console.log(weak.has(obj));
+    console.log(weak.set(obj2, 5).get(obj2));
+    console.log(weak.get(obj2));
+    console.log(weak.delete(obj));
+    console.log(weak);
+}
+{
+    //add  has delete clear
+    const set = new Set([6, 7]);
+    set.add(4);
+    let obj = {};
+    let arr = [];
+    let obj1 = {};
+    set.add(obj);
+    set.add(obj1);
+    set.add(arr);
+    console.log(set);
+    console.log(set.has(obj));
+    console.log(set.delete(obj1));
+    console.log(set.clear());
+    console.log(set);
+}
+{
+    let person = {};
+    let personName = 'lihua';
+    Object.defineProperty(person, 'namep', {
+        get: function () {
+            console.log('触发了get方法');
+            return personName;
+        },
+        set: function (val) {
+            console.log('触发了set方法');
+            personName = val;
+        },
+    });
+    console.log(person.namep);
+    personName = 'liming';
+    console.log(person.namep);
+    person.namep = 'huahua';
+    console.log(person.namep);
+}
+{
+    let person = {
+        age: 0,
+        name: 'zhy',
+    };
+    let handler = {
+        get(obj, key) {
+            console.log('触发了get');
+            return key in obj ? obj[key] : 66;
+        },
+        set(obj, key, val) {
+            console.log('触发了set');
+            obj[key] = val;
+            return false;
+        },
+        construct(target, args) {
+            console.log('触发了construct');
+            console.log(target);
+            console.log(args);
+        },
+    };
+    function A() {}
+    let proxy = new Proxy(person, handler);
+    console.log(proxy.name);
+    proxy.age = 33;
+    console.log(proxy.age);
+    function A() {}
+    let proxy1 = new Proxy(A, handler);
+    let p1 = new proxy1();
+    console.log(p1);
+}
+{
+    let person = {
+        age: 0,
+        school: 'xdu',
+        children: {
+            name: '小明',
+            child: {
+                age: 100,
+            },
+        },
+    };
+    let handler = {
+        get(obj, key) {
+            console.log('触发了get');
+            console.log(key);
+            return key in obj ? obj[key] : 88;
+        },
+        set(obj, key, val) {
+            console.log('触发了set');
+            obj[key] = val;
+            return true;
+        },
+    };
+    let proxy = new Proxy(person, handler);
+    // console.log(proxy.children.name);
+    console.log(proxy.children.child.age);
+}
+{
+    // 自定义一个迭代器
+    function Counter(value) {
+        this.init = value;
+    }
+    Counter.prototype[Symbol.iterator] = function () {
+        let count = 1,
+            limit = this.init;
+        return {
+            next() {
+                if (limit >= count) {
+                    return { value: count++, done: false };
+                } else {
+                    return { value: undefined, done: true };
+                }
+            },
+        };
+    };
+    let count = new Counter(4);
+    const iterator = count[Symbol.iterator]();
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    console.log(iterator.next());
+    for (let i of count) {
+        console.log(i);
+    }
+}
+{
+    function* generator() {
+        let a = yield 1;
+        let b = yield 2;
+        let c = yield 3;
+        console.log(a, b, c);
+    }
+    let gen = generator();
+    console.log(gen.next());
+    console.log(gen.next(5));
+    console.log(gen.next(3));
+    console.log(gen.next(2));
+    console.log(gen.next());
+}
+{
+    function* generator() {
+        let a = yield 1;
+        let b = yield 2;
+        let c = yield 3;
+        console.log(a, b, c);
+    }
+    let gen = generator();
+    console.log(gen.next());
+    console.log(gen.return(5));
+}
+{
+    let p1 = new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(2);
+        });
+    });
+    let p2 = new Promise((resolve, reject) => {
+        console.log('我是p2');
+        resolve(3);
+    });
+    async function person() {
+        const v1 = await p1.then(value => {
+            console.log(value);
+            return value;
+        });
+        const v2 = await p2.then(value => {
+            return value;
+        });
+        return v1 * v2;
+    }
+    person().then(value => {
+        console.log(value);
+    });
+}
+{
+    // instanceof 的实现
+    function instanceOf(target, source) {
+        let flag = false;
+        while (target) {
+            if (
+                Object.getPrototypeOf(target) === Object.getPrototypeOf(source)
+            ) {
+                return (flag = true);
+            }
+            console.log(Object.getPrototypeOf(target));
+            target = Object.getPrototypeOf(target);
+        }
+        return flag;
+    }
+    console.log(instanceOf(function () {}, Function));
+    console.log(function () {} instanceof Function);
+}
+{
+    // 链表结构
+    function Node(value) {
+        this.value = value;
+        this.next = null;
+    }
+    function LinkList() {
+        this.head = null;
+    }
+    LinkList.prototype.add = function (data) {
+        let node = new Node(data);
+        if (this.head === null) {
+            this.head = node;
+        } else {
+            let current = this.head;
+            while (true) {
+                if (current.next === null) {
+                    current.next = node;
+                    break;
+                }
+                current = current.next;
+            }
+        }
+    };
+    LinkList.prototype.insert = function (index, data) {
+        let node = new Node(data);
+        let current = this.head;
+        let prev = null;
+        while (true) {
+            if (index === current.value) {
+                prev = current.next;
+                current.next = node;
+                if (current.next !== null) {
+                    node.next = prev;
+                    prev = null;
+                    break;
+                }
+            }
+            current = current.next;
+        }
+    };
+    LinkList.prototype.delete = function (index) {
+        let current = this.head;
+        let prev = null;
+        while (true) {
+            if (index === current.value) {
+                prev.next = current.next;
+                break;
+            }
+            prev = current;
+            current = current.next;
+        }
+    };
+    let link = new LinkList();
+    link.add(3);
+    console.log(link);
+    link.add(4);
+    console.log(link);
+    link.add(5);
+    console.log(link);
+    link.insert(4, 6);
+    console.dir(link, { depth: null });
+    link.delete(5);
+    console.dir(link, { depth: null });
 }

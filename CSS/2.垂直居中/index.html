@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>垂直居中</title>
+    <style>
+        .box {
+            height: 150px;
+            line-height: 150px;
+            width: 150px;
+            background: pink;
+        }
+
+        .box2 {
+            height: 150px;
+            width: 150px;
+            background: pink;
+            line-height: 30px;
+        }
+
+        .box3 {
+            background: pink;
+            height: 200px;
+            line-height: 200px;
+            font-size: 0;
+        }
+
+        img {
+            vertical-align: middle;
+        }
+
+        .box4 {
+            background: pink;
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .box6 {
+            position: relative;
+            height: 150px;
+            width: 150px;
+            background: pink;
+        }
+
+        .box7 {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 50px;
+            width: 50px;
+            background: red;
+        }
+
+        .box8 {
+            position: relative;
+            height: 150px;
+            background: pink;
+        }
+
+        .box9 {
+            position: absolute;
+            margin: auto 0;
+            top: 0;
+            bottom: 0;
+            height: 50px;
+            width: 50px;
+            background: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">垂直居中</div>
+    <p class="box2">
+        <span>345678900987665</span>
+        <span>345678900987665</span>
+        <span>345678900987665</span>
+        <span>345678900987665</span>
+        <span>345678900987665</span>
+    </p>
+    <div class="box3">
+        <img src="./mm1.jpg" /><span style="display: inline-block;">zhy</span>
+    </div>
+    <div class="box4">
+        <div class="box5">131231</div>
+    </div>
+    <div class="box6">
+        <div class="box7"></div>
+    </div>
+    <div class="box8">
+        <div class="box9"></div>
+    </div>
+</body>
+
+</html>
