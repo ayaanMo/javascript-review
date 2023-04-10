@@ -654,3 +654,18 @@ bb(b);
     link.delete(5);
     console.dir(link, { depth: null });
 }
+{
+    function ab() {
+        let a = 3;
+        return function (val) {
+            a = a + val;
+            return a;
+        };
+    }
+    let a1 = ab();
+    console.log(a1(3));
+
+    let a2 = ab();
+    console.log(a2(4));
+    console.log(a2(5));
+}
