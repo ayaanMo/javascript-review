@@ -1,55 +1,44 @@
 {
     Function.prototype.myCall = function (context) {
-        var context = context || window;
-        let fn = Symbol();
+        const context = context || window;
+        const fn = Symbol();
         context[fn] = this;
-        let args = [];
-        for (let i = 1; i < arguments.length; i++) {
-            args.push('arguments[' + i + ']');
-        }
-        let res = eval('context[fn](' + args + ')');
+        let args = [].slice.call(arguments, 1);
+        const result = context[fn](...args);
         delete context[fn];
-        return res;
+        return result;
     };
 }
 {
-    Function.prototype.myApply = function (context, arr) {
-        var context = context || window;
-        let fn = Symbol();
+    Function.prototype.myApply = function (context, arr = []) {
+        const context = context || window;
+        const fn = Symbol();
         context[fn] = this;
-        let res;
-        if (!arr) {
-            res = context[fn]();
+        let result;
+        if (arr.length > 0) {
+            result = context[fn]();
         } else {
-            if (Object.prototype.toString.call(arr) !== '[object Array]') {
-                throw '请检查传递的参数类型是否是数组';
-            }
-            let args = [];
-            for (let i = 0; i < arr.length; i++) {
-                args.push('arr[' + i + ']');
-            }
-            res = eval('context[fn](' + args + ')');
+            context[fn](...arr);
         }
         delete context[fn];
-        return res;
+        return result;
     };
 }
 {
     Function.prototype.myBind = function (context) {
-        let self = this;
-        let args = [].slice.call(arguments, 1);
+        const self = this;
+        const args = [].slice.call(arguments, 1);
         function bindFunc() {
-            let bindArgs = [].slice.call(arguments, 0);
-
-            return self.call(
-                this instanceof prototypeFunc ? this : context,
-                args.concat(bindArgs)
+            const params = [].slice.call(arguments, 0);
+            return self.apply(
+                this instanceof inheritProto ? this : context,
+                args.concat(params)
             );
         }
-        function prototypeFunc() {}
-        prototypeFunc.prototype = self.prototype;
-        bindFunc.prototype = new prototypeFunc();
-        bindFunc.prototype.constructor = bindFunc;
+        function inheritProto() {}
+        inheritProto.prototype = self.prototype;
+        inheritProto.constructor = bindFunc;
+        bindFunc.prototype = new inheritProto();
         return bindFunc;
     };
 }

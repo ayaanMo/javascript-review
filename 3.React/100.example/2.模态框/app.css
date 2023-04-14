@@ -1,0 +1,75 @@
+.z-modal-wrap {
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.z-modal-wrap .z-modal-context {
+  position: relative;
+  margin: 0 auto;
+  z-index: 1000;
+  top: 100px;
+  background-color: #fff;
+  width: 520px;
+  border-radius: 8px;
+  padding: 20px 24px;
+  animation: xSpread 0.3s;
+}
+.z-modal-wrap .z-modal-header {
+  margin-bottom: 8px;
+}
+.z-modal-wrap .z-modal-header .z-modal-title {
+  color: rgb(0, 0, 1);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.z-modal-wrap .z-modal-body {
+  font-size: 14px;
+}
+.z-modal-wrap .z-modal-footer {
+  margin-top: 12px;
+  text-align: end;
+}
+.z-modal-wrap .z-modal-footer .z-modal-btn {
+  border-color: #d9d9d9;
+  font-size: 14px;
+  height: 32px;
+  box-shadow: 0 2px 0 rgba(5, 145, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 15px;
+}
+.z-modal-wrap .z-modal-footer .z-modal-ok {
+  -webkit-margin-start: 8px;
+          margin-inline-start: 8px;
+  background-color: #1677ff;
+  color: #fff;
+}
+.z-modal-wrap .z-modal-footer .z-modal-cancel {
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.88);
+}
+.z-modal-wrap .z-modal-mask {
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+@keyframes xSpread {
+  0% {
+    opacity: 0.3;
+    transform: translateY(-50%) scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}/*# sourceMappingURL=app.css.map */
