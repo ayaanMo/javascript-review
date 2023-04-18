@@ -1,41 +1,48 @@
-// 事件被触发n秒后再执行，如果在n秒内被再次出发，则时间重置
-function debounce(fn, wait) {
-    let timer;
-    return function () {
-        let context = this;
-        let args = [...arguments];
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-            fn.apply(context, args);
-        }, wait);
-    };
+{
+    function debounce(fn, wait, immediate) {
+        let timer = null;
+        return function () {
+            const context = this;
+            const args = [].slice.call(arguments, 0);
+            if (timer) clearTimeout(timer);
+            if (immediate) {
+                const callnow = !timer;
+                timer = setTimeout(() => {
+                    timer = null;
+                }, wait);
+                if (callnow) fn.apply(context, args);
+            } else {
+                timer = setTimeout(() => {
+                    fn.apply(context, args);
+                }, wait);
+            }
+        };
+    }
 }
-
-// 每过n秒仅执行一次回调函数。如单位时间内多次触发函数，也只有一次生效。
-// 时间戳模式
-function throttle(fn, wait) {
-    let previous = 0;
-    return function () {
-        let content = this;
-        let args = [...arguments];
-        let nowDate = +new Date();
-        if (nowDate > previous + wait) {
-            fn.apply(content, args);
-            previous = nowDate;
-        }
-    };
+{
+    function throttle(fn, wait) {
+        let previous = 0;
+        return function (...args) {
+            let now = +new Date();
+            const context = this;
+            if (now > previous + wait) {
+                fn.apply(context, args);
+                previous = now;
+            }
+        };
+    }
 }
-// 定时器模式
-function throttleTimer(fn, wait) {
-    let timer;
-    return function () {
-        let context = this;
-        let args = [...arguments];
-        if (timer) return;
-        timer = setTimeout(function () {
-            fn.apply(context, args);
-            clearTimeout(timer);
-            timer = null;
-        }, wait);
-    };
+{
+    function throttle(fn, wait) {
+        let timer = null;
+        return function (...args) {
+            if (timer) return;
+            const context = this;
+            timer = setTimeout(() => {
+                fn.apply(context, args);
+                clearTimeout(timer);
+                timer = null;
+            }, wait);
+        };
+    }
 }
