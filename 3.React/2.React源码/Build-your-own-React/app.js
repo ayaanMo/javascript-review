@@ -58,7 +58,7 @@ let deletions = null;
  * commit阶段再次遍历Fiber树,将DOM节点挂载到文档上
  */
 function render(element, container) {
-    debugger;
+    // debugger;
     wipRoot = {
         dom: container,
         props: {
@@ -67,6 +67,7 @@ function render(element, container) {
         // 和上一次的commit阶段的就fiber树建立链接
         alternate: currentRoot,
     };
+    console.log(wipRoot);
     deletions = [];
     nextUnitOfWork = wipRoot;
 }
@@ -82,6 +83,7 @@ function workLoop(deadline) {
     // 是否要暂停
     let shouldYield = false;
     while (nextUnitOfWork && !shouldYield) {
+        console.log(nextUnitOfWork);
         // 执行一个工作单元并返回下一个工作单元
         nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
         // 判断空闲时间是否足够
@@ -96,57 +98,8 @@ function workLoop(deadline) {
 
     requestIdleCallback(workLoop);
 }
-/**
- * 第五步 Render和Commit阶段
- * commit阶段完成后，用一个变量来保存旧的fiber树（称为currentRoot）来和当前要修改的fiber树进行比较
- * 每个wipRoot上新增一个属性alternate用来链接旧的fiber树(上一次commit后的)
- *
- */
-function commitRoot() {
-    // 移除第六步中收集的旧节点
-    deletions.forEach(commitWork);
-    // commit当前wipRoot的child元素
-    commitWork(wipRoot.child);
-    // commit阶段完成后，保存当前fiber树 改变当前root指向
-    currentRoot = wipRoot;
-    wipRoot = null;
-}
-
-function commitWork(fiber) {
-    if (!fiber) {
-        return;
-    }
-    let domParentFiber = fiber.parent;
-    while (!domParentFiber.dom) {
-        domParentFiber = domParentFiber.parent;
-    }
-    const domParent = domParentFiber.dom;
-
-    if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
-        domParent.appendChild(fiber.dom);
-    } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
-        // 更新dom的属性(新增新属性和移除旧属性) 及事件的添加和移除处理
-        updateDom(fiber.dom, fiber.alternate.props, fiber.props);
-    } else if (fiber.effectTag === 'DELETION') {
-        commitDeletion(fiber, domParent);
-    }
-
-    commitWork(fiber.child);
-    commitWork(fiber.sibling);
-}
-/**
- * 删除节点
- * @param {*} fiber
- * @param {*} domParent
- */
-function commitDeletion(fiber, domParent) {
-    if (fiber.dom) {
-        domParent.removeChild(fiber.dom);
-    } else {
-        commitDeletion(fiber.child, domParent);
-    }
-}
 requestIdleCallback(workLoop);
+
 /**
  * 每个元素都是一个fiber，每一个fiber都是一个任务单元
  * fiber节点完成下述三件事:
@@ -294,7 +247,7 @@ function reconcileChildren(wipFiber, elements) {
                 effectTag: 'UPDATE',
             };
         }
-        // 类型不同，但是新fiber元素存在，则进行更新（新增新的fiber）
+        // 类型不同，但是新fiber元素存在，则进行新增（新增新的fiber）
         if (element && !sameType) {
             newFiber = {
                 type: element.type,
@@ -324,6 +277,56 @@ function reconcileChildren(wipFiber, elements) {
 
         prevSibling = newFiber;
         index++;
+    }
+}
+/**
+ * 第五步 Render和Commit阶段
+ * commit阶段完成后，用一个变量来保存旧的fiber树（称为currentRoot）来和当前要修改的fiber树进行比较
+ * 每个wipRoot上新增一个属性alternate用来链接旧的fiber树(上一次commit后的)
+ *
+ */
+function commitRoot() {
+    // 移除第六步中收集的旧节点
+    deletions.forEach(commitWork);
+    // commit当前wipRoot的child元素
+    commitWork(wipRoot.child);
+    // commit阶段完成后，保存当前fiber树 改变当前root指向
+    currentRoot = wipRoot;
+    wipRoot = null;
+}
+
+function commitWork(fiber) {
+    if (!fiber) {
+        return;
+    }
+    let domParentFiber = fiber.parent;
+    while (!domParentFiber.dom) {
+        domParentFiber = domParentFiber.parent;
+    }
+    const domParent = domParentFiber.dom;
+
+    if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
+        domParent.appendChild(fiber.dom);
+    } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
+        // 更新dom的属性(新增新属性和移除旧属性) 及事件的添加和移除处理
+        updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+    } else if (fiber.effectTag === 'DELETION') {
+        commitDeletion(fiber, domParent);
+    }
+
+    commitWork(fiber.child);
+    commitWork(fiber.sibling);
+}
+/**
+ * 删除节点
+ * @param {*} fiber
+ * @param {*} domParent
+ */
+function commitDeletion(fiber, domParent) {
+    if (fiber.dom) {
+        domParent.removeChild(fiber.dom);
+    } else {
+        commitDeletion(fiber.child, domParent);
     }
 }
 function useState(initial) {
@@ -363,22 +366,25 @@ const Zact = {
     render,
     useState,
 };
+// const element = (
+//     <div style="background: salmon">
+//         <h1>Hello World</h1>
+//         <h2 style="text-align:right">from Zact</h2>
+//     </div>
+// );
 // 注释一下，babel 会将 JSX 编译的时候会调用我们的createElement方法 将jsx解析成我们要的js代码
 /** @jsx Zact.createElement */
-const element = (
-    <div style="background: salmon">
-        <h1>Hello World</h1>
-        <h2 style="text-align:right">from Didact</h2>
-    </div>
-);
-// function Counter() {
-//     const [state, setState] = Zact.useState(1);
-//     return (
-//         <h1 onClick={() => setState(c => c + 1)} style="user-select: none">
-//             Count: {state}
-//         </h1>
-//     );
-// }
-// const element = <Counter />;
+function Counter() {
+    const [state, setState] = Zact.useState(1);
+    return (
+        <div style="background: salmon">
+            <h1 onClick={() => setState(c => c + 1)} style="user-select: none">
+                Count: {state}
+            </h1>
+            {state > 5 ? <h2 style="text-align:right">from Zact</h2> : ''}
+        </div>
+    );
+}
+const element = <Counter />;
 const container = document.getElementById('root');
 Zact.render(element, container);

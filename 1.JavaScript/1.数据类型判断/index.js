@@ -21,3 +21,8 @@ console.log('--------------------');
 console.log(typeOf('1'));
 console.log('--------------------');
 console.log(typeOf(false));
+{
+    let str = 'abcdefghijk-lmnopqrstuvwxyz';
+    let strs = str.substring(0, str.length - 1);
+    console.log(strs);
+}
